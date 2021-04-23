@@ -1,6 +1,8 @@
 program main
 
+  !> https://fr.wikipedia.org/wiki/Décomposition_en_valeurs_singulières
   !> http://www.netlib.org/lapack/explore-html/d1/d7e/group__double_g_esing_ga84fdf22a62b12ff364621e4713ce02f2.html
+
   implicit none
   integer            :: n
   integer            :: m
@@ -18,8 +20,14 @@ program main
   external           :: dgesvd
   external           :: print_matrix
   
-  print '(/"-- Mise en oeuvre de la proecdure Lapack : dgesvd ---"/)'
-   
+  !print '(/"-- Décomposition en valeurs singulières - Propres ou Proper Orthogonal Decomposition (POD) ---"/)'
+  print '(/"-- Décomposition Orthogonale aux valeurs Propres - Proper Orthogonal Decomposition (POD) ---"/)'
+  
+  ! A = U S VT
+  !> A \in M_{m,n}
+  !> U matrice unitaire \in M_{m,m}  (matrice unitaire: U U* = U* U = I) U* matrice adjointe de U (Transposée de la conjugée)
+  !> S matrice \in M_{m,n} seuls les termes diagonaux sont des réels positifs ou nuls
+  !> VT matrice unitaire \in M_{n,n} (V* V = V V* = I)
   
   !m=2
   !n=3
@@ -42,7 +50,7 @@ program main
   !A(4,1:5)=[0d0,4d0,0d0,0d0,0d0]
 
   ! https://software.intel.com/sites/products/documentation/doclib/mkl_sa/11/mkl_lapack_examples/dgesvd_ex.f.htm
-  !
+  
   m=6
   n=5
   ldA =m
@@ -74,23 +82,46 @@ program main
   
   
   lWork=-1
-  call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,info)
+ !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,info)
+  call dgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,info)
+
   LWORK = MIN( LWMAX, INT( WORK(1) ) )
 
-  call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,info)
+ !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,info)
+  call dgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,info)
   
   if( .not.info==0 )print '("Problem Info=",i0)',info
-  print '(/"A = U * SIGMA * transpose(V)"/)'
+  
+  print '(/"A = U * S * transpose(V)"/)'
+  
+  !les coefficients diagonaux de S sont égaux aux valeurs singulières de A.
+  ! Les colonnes de U et de V sont, respectivement, vecteur singulier à gauche et à droite pour les valeurs singulières correspondantes.
+  
+  call print_matrix( 'Valeurs singulières par ordre décroissant', 1, size(S), S)
+  
+  
 
-  call print_matrix( 'Singular values', 1, size(S), S)
+
+
+  block
+    real(8), pointer :: sigma(:,:)
+    integer          :: i
+
+    allocate(Sigma(m,n)) ; sigma(:,:)=0d0
+    do i=1,size(S)
+      sigma(i,i)=s(i)
+    enddo
+
+    call print_matrix( 'U', size(U,1), size(U,2), U)
+    call print_matrix( 'Sigma', m, n, Sigma)
+    call print_matrix( 'VT',size(VT,1), size(VT,2), VT)
   
-  !     Print left singular vectors.
-  
-  call print_matrix( 'Left singular vectors (stored columnwise)', size(U,1), size(U,2), U)
-  
-  !     Print right singular vectors.
-  
-  call print_matrix( 'Right singular vectors (stored rowwise)',size(VT,1), size(VT,2), VT)
+    call print_matrix( 'Matrice Unitaire UxU^*=Id', m, m, matmul(U ,Transpose(U )))
+    call print_matrix( 'Matrice Unitaire VxV^*=Id', n, n, matmul(VT,Transpose(VT)))
+    call print_matrix( 'A = U x S x VT',m, n,   matmul(U,matmul(sigma,VT))) 
+    deallocate(sigma)
+  end block
+
 
   deallocate(A)
   deallocate(U)
