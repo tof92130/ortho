@@ -1,4 +1,4 @@
-toto est grand
+titi est grand
 
 
 note: valgrind --leak-check=full --show-leak-kinds=all --log-fd=1 ./bin/space -f eulerRigid_3D_Valgrind.def > valgrind.log
