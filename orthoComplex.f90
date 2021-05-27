@@ -47,7 +47,7 @@ program main
   
   call print_matrix( 'Matrix A',size(A,1), size(A,2), A)
   
-  allocate(  S(1:min(1:m,1:n)) )  
+  allocate(  S(1:min(m,n)) )
   allocate(  U(1:ldu ,1:m))  
   allocate( VT(1:ldVT,1:n))
   allocate(rwork(1:5*n))
