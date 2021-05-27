@@ -44,14 +44,14 @@ program main
   A(4,1:n)=[ (-0.37, 0.38), ( 0.19,-0.54), (-0.98,-0.36), ( 0.22,-0.20) ] 
   A(5,1:n)=[ ( 0.83, 0.51), ( 0.20, 0.01), (-0.17,-0.46), ( 1.47, 1.59) ] 
   A(6,1:n)=[ ( 1.08,-0.28), ( 0.20,-0.12), (-0.07, 1.23), ( 0.26, 0.26) ]
-   
+  
   call print_matrix( 'Matrix A',size(A,1), size(A,2), A)
-   
-  allocate( s(1:min(m,n)) )  
-  allocate(  U(ldu ,m))  
-  allocate( VT(ldVT,n))
-  allocate(rwork(5*n))
-   
+  
+  allocate(  S(1:min(1:m,1:n)) )  
+  allocate(  U(1:ldu ,1:m))  
+  allocate( VT(1:ldVT,1:n))
+  allocate(rwork(1:5*n))
+  
   lWork=-1
  !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,rwork,info)
   call zgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,rwork,info)
