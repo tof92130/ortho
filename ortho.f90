@@ -303,3 +303,38 @@ subroutine print_realMatrix( DESC, M, N, A)
   enddo
   return
 end subroutine print_realMatrix
+
+
+subroutine readSnapShots()
+  !<<<
+  use mesParametres
+  use myData
+  !>>>
+  !<<<
+  implicit none
+  type(monType) :: ob
+  !>
+  integer             :: iSnapShot
+  integer             :: nSnapShot
+  complex(8), pointer :: A(:,:)
+  !>>>
+  !<<<
+
+  print '(">>> readSnapShots")'  
+  nSnapShot=1
+  do iSnapShot=1,nSnapShot
+    allocate(character(len=128) :: ob%file)
+    ob%file="./mode_m01_n01_small_000000340.dat"
+    call ob%readRAW
+    if( iSnapShot==1 )allocate( A(1:ob%nDeg,1:nSnapShot) )
+    !A(:,iSnapShot)=ob%zsol(:,:)
+    call ob%display
+    call ob%delete
+  enddo
+  !<<<
+  !>>>
+  deallocate(A)
+  !<<<
+  print '("<<< readSnapShots")'  
+  return
+end subroutine readSnapShots
