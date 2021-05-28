@@ -1,3 +1,53 @@
+subroutine ProperOrthogonalDecomposition(m,n,A,ldA,S,U,ldU,VT,ldVT,info)
+  !>>>
+  implicit none
+  integer            :: n
+  integer            :: m
+  complex(8)         :: A(1:ldA,1:n)
+  integer            :: ldA
+  real(8)            :: S( 1:min(m,n) )
+  complex(8)         :: U (1:ldU,1:m)
+  integer            :: ldU
+  complex(8)         :: VT(1:ldVT,1:n)
+  integer            :: ldVT
+  integer            :: info
+  !>
+  integer, parameter :: lWMax=1000
+  complex(8)         :: work(1:lWMax)
+  integer            :: lWork
+  real(8), pointer   :: rwork(:)
+  external           :: zgesvd
+  !<<<
+  !>>>
+  print '(">>> ProperOrthogonalDecomposition")'
+  !<<<
+  !>>>
+  allocate(rWork(1:5*n))
+  !<<<
+  !>>>
+  lWork=-1
+ !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,rwork,info)
+  call zgesvd('All','S'  ,m,n,A(:,:),ldA,S(:),U(:,:),ldU,VT(:,:),ldVT,work,lWork,rWork(:),info)
+  !call zgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,rwork,info)
+  
+  lwork = min( lWmax, int(work(1)) )
+  print '("lWork=",i0)',lWork
+  
+  !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,rwork,info)
+  !call zgesvd('All','S'  ,m,n,A(:,:),lda,s,u,ldu,vt,ldvt,work,lwork,rwork,info)
+  call zgesvd('All','S'  ,m,n,A(:,:),ldA,S(:),U(:,:),ldU,VT(:,:),ldVT,work,lWork,rWork(:),info)
+  
+  if( .not.info==0 )print '("Problem Info=",i0)',info
+
+  deallocate(rWork)
+  !<<<
+  !>>>
+  print '("<<< ProperOrthogonalDecomposition")'
+  !<<<
+  return
+end subroutine ProperOrthogonalDecomposition
+
+
 subroutine orthoComplex()
   !>>>
   !  https://fr.wikipedia.org/wiki/Décomposition_en_valeurs_singulières
@@ -14,12 +64,7 @@ subroutine orthoComplex()
   integer            :: ldU
   complex(8), pointer:: VT(:,:)
   integer            :: ldVT
-  integer, parameter :: lWMax=1000
-  complex(8)         :: work(1:lWMax)
-  integer            :: lWork
-  real(8)   , pointer:: rwork(:)
   integer            :: info
-  external           :: zgesvd
   external           :: print_matrix
   !<<<
   !>>>
@@ -46,24 +91,19 @@ subroutine orthoComplex()
   A(6,1:n)=[ ( 1.08,-0.28), ( 0.20,-0.12), (-0.07, 1.23), ( 0.26, 0.26) ]
   
   call print_matrix( 'Matrix A',size(A,1), size(A,2), A)
+  !<<<
   
-  allocate(  S(1:min(m,n)) )
-  allocate(  U(1:ldu ,1:m))  
+  !>>>
+  allocate( U (1:ldU ,1:m))  
+  allocate( S (1:min(m,n)) )
   allocate( VT(1:ldVT,1:n))
-  allocate(rwork(1:5*n))
+  !<<<
   
-  lWork=-1
- !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,rwork,info)
-  call zgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,rwork,info)
-   
-  lwork = min( lWmax, int( work(1) ) )
-  print '("lWork=",i0)',lWork
-   
- !call dgesvd('All','All',m,n,A,lda,S,U,ldu,VT,ldVT,work,lWork,rwork,info)
-  call zgesvd('All','S'  ,m,n,a,lda,s,u,ldu,vt,ldvt,work,lwork,rwork,info)
-   
-  if( .not.info==0 )print '("Problem Info=",i0)',info
-   
+  !>>>
+  call ProperOrthogonalDecomposition(m,n,A,ldA,S,U,ldU,VT,ldVT,info)  
+  !<<<
+  
+  !>>>  
   print '(/"A = U * Sigma * transpose(V)"/)'
    
   ! les coefficients diagonaux de S sont égaux aux valeurs singulières de A.
@@ -71,21 +111,20 @@ subroutine orthoComplex()
   
   !call print_matrix( 'Valeurs singulières par ordre décroissant', 1, size(S), S)
   print '("Valeurs singulières par ordre décroissan: ",*(f6.2,1x))',S(:)
-   
-   
+  
   verif: block
     complex(8), pointer :: sigma(:,:)
-    integer          :: i
-
+    integer             :: i
+    
     allocate(Sigma(1:m,1:n)) ; sigma(:,:)=0d0
     do i=1,size(S)
       sigma(i,i)=s(i)
     enddo
-
+    
     call print_matrix( 'U', size(U,1), size(U,2), U)
     call print_matrix( 'Sigma', m, n, Sigma)
     call print_matrix( 'VT',size(VT,1), size(VT,2), VT)
-     
+    
     call print_matrix( 'Matrice Unitaire UxU^*=Id', m, m, matmul(U ,Transpose(conjg(U ))))
     call print_matrix( 'Matrice Unitaire VxV^*=Id', n, n, matmul(VT,Transpose(conjg(VT))))
     call print_matrix( 'A = U x Sigma x VT',m, n,   matmul(U,matmul(sigma,VT))) 
@@ -100,10 +139,9 @@ subroutine orthoComplex()
   !<<<
 end subroutine orthoComplex
 
-
 subroutine print_matrix( DESC, M, N, A)
   !>>>
-  CHARACTER*(*) :: DESC
+  CHARACTER(*) :: DESC
   integer       :: m,n
   complex(8)    :: A(1:m,1:n)
   !>
