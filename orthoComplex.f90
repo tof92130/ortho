@@ -1,4 +1,4 @@
-program main
+subroutine orthoComplex()
   !>>>
   !  https://fr.wikipedia.org/wiki/Décomposition_en_valeurs_singulières
   !  http://www.netlib.org/lapack/explore-html/d1/d7e/group__double_g_esing_ga84fdf22a62b12ff364621e4713ce02f2.html
@@ -98,7 +98,7 @@ program main
   deallocate(S)
   deallocate(VT)
   !<<<
-end program main
+end subroutine orthoComplex
 
 
 subroutine print_matrix( DESC, M, N, A)

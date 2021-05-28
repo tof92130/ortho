@@ -8,7 +8,9 @@ ifort orthoComplex.f90  -c  -O3
 
 ifort ~/Developer/space/tools/spaceIO/src/spaceIO.F90 -c -I${LIBMESH_DIR}/include -I${SPACE_BASIS_DIR}/include -I. -O3
 
-ifort spaceIO.o orthoComplex.o -L${LIBMESH_DIR}/lib -lMeshbf.7 -L${SPACE_BASIS_DIR}/lib -lspaceBasis  -mkl -o ortho
+ifort main.f90  -c  -O3
+
+ifort spaceIO.o orthoComplex.o main.o -L${LIBMESH_DIR}/lib -lMeshbf.7 -L${SPACE_BASIS_DIR}/lib -lspaceBasis  -mkl -o ortho
 
 
 orthoComplex avec gfortran
