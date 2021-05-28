@@ -19,6 +19,8 @@ gfortran-10 orthoComplex.f90  -c  -O3
 
 gfortran-10 ~/Developer/space/tools/spaceIO/src/spaceIO.F90 -c -I${LIBMESH_DIR}/include -I${SPACE_BASIS_DIR}/include -I. -O3  -ffree-line-length-256 -framework Accelerate
 
+gfortran-10 main.f90  -c  -O3
 
-gfortran-10  spaceIO.o orthoComplex.o -L${LIBMESH_DIR}/lib -lMeshbf.7 -L${SPACE_BASIS_DIR}/lib -lspaceBasis -O3  -ffree-line-length-256 -framework Accelerate -o ortho
+
+gfortran-10  spaceIO.o orthoComplex.o main.o -L${LIBMESH_DIR}/lib -lMeshbf.7 -L${SPACE_BASIS_DIR}/lib -lspaceBasis -O3  -ffree-line-length-256 -framework Accelerate -o ortho
 
